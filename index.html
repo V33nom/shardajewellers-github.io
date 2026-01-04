@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharda Jewellers | Ethereal Silk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Montserrat:wght@200;400;600&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --silk-ivory: #F9F7F2;
+            --shimmer-gold: #D4AF37;
+            --deep-ink: #1A1A1A;
+            --soft-gold: #C5A059;
+            --silk-shadow: rgba(212, 175, 55, 0.1);
+        }
+
+        body {
+            background-color: var(--silk-ivory);
+            color: var(--deep-ink);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            cursor: none; 
+            scroll-behavior: smooth;
+        }
+
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        .font-display { font-family: 'Playfair Display', serif; }
+
+        /* Custom Magnifying Ring Cursor - Hidden on Touch Devices */
+        #custom-cursor {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--shimmer-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), width 0.3s, height 0.3s;
+            transform: translate(-50%, -50%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 1024px) {
+            #custom-cursor { display: flex; }
+            body { cursor: none; }
+        }
+
+        #custom-cursor::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--shimmer-gold);
+            border-radius: 50%;
+        }
+
+        .cursor-hover #custom-cursor {
+            width: 100px;
+            height: 100px;
+            background: rgba(212, 175, 55, 0.05);
+            border-width: 2px;
+        }
+
+        /* Side Menu Drawer */
+        #nav-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 30px;
+            transform: translateX(100%);
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
+            border-left: 1px solid var(--silk-shadow);
+        }
+
+        #nav-menu.active { transform: translateX(0); }
+
+        #menu-overlay-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+            z-index: 450;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #menu-overlay-bg.active { display: block; opacity: 1; }
+
+        /* Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .float-element { animation: float 6s ease-in-out infinite; }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Section Reveal */
+        .reveal {
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            filter: blur(0px);
+            transform: translateY(0);
+        }
+
+        /* Product Dossier Modal */
+        #dossier-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(249, 247, 242, 0.99);
+            z-index: 600;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            overflow-y: auto;
+        }
+
+        #dossier-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .silk-bg {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, #fffbf2 0%, #f9f7f2 100%);
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--silk-ivory); }
+        ::-webkit-scrollbar-thumb { background: var(--soft-gold); }
+
+        /* Responsive Hero Text */
+        .hero-text-main {
+            font-size: clamp(3.5rem, 12vw, 12rem);
+        }
+    </style>
+</head>
+<body class="selection:bg-soft-gold selection:text-white">
+
+    <div class="silk-bg"></div>
+
+    <!-- Custom Cursor -->
+    <div id="custom-cursor"></div>
+
+    <!-- Navigation Background Overlay -->
+    <div id="menu-overlay-bg"></div>
+
+    <!-- Side Menu Drawer -->
+    <div id="nav-menu">
+        <button id="closeMenu" class="absolute top-8 right-8 text-soft-gold hover:rotate-90 transition-transform duration-500">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <span class="text-[10px] uppercase tracking-[0.5em] text-soft-gold mb-10 block border-b border-soft-gold/10 pb-4">Index</span>
+        <div class="flex flex-col space-y-6 md:space-y-8">
+            <a href="#gallery" class="nav-link text-3xl md:text-5xl font-serif italic hover:text-soft-gold hover:translate-x-2 transition-all">The Archive</a>
+            <a href="#materiality" class="nav-link text-3xl md:text-5xl font-serif italic hover:text-soft-gold hover:translate-x-2 transition-all">Purity 91.6</a>
+            <a href="#atelier" class="nav-link text-3xl md:text-5xl font-serif italic hover:text-soft-gold hover:translate-x-2 transition-all">The Atelier</a>
+            <a href="#bespoke" class="nav-link text-3xl md:text-5xl font-serif italic hover:text-soft-gold hover:translate-x-2 transition-all">Bespoke Suite</a>
+        </div>
+        <div class="mt-auto pt-10">
+            <p class="text-[9px] uppercase tracking-[0.3em] opacity-40 leading-relaxed">
+                Delhi • London • Mumbai<br>
+                Official Master Goldsmiths Since 1974
+            </p>
+        </div>
+    </div>
+
+    <!-- Product Dossier Modal -->
+    <div id="dossier-modal" class="items-start md:items-center justify-center p-4 md:p-10">
+        <div class="max-w-6xl w-full bg-white shadow-2xl p-6 md:p-16 relative overflow-hidden flex flex-col md:flex-row gap-8 md:gap-16 my-auto">
+            <button id="closeDossier" class="absolute top-4 right-4 md:top-8 md:right-8 text-soft-gold z-10">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="w-full md:w-1/2">
+                <img id="modal-img" src="" class="w-full aspect-[3/4] object-cover border border-soft-gold/10">
+            </div>
+            <div class="w-full md:w-1/2 flex flex-col justify-center space-y-6 md:space-y-10">
+                <div class="space-y-2">
+                    <span class="text-[10px] uppercase tracking-[0.5em] text-soft-gold font-bold">Official Plate Spec</span>
+                    <h2 id="modal-title" class="text-3xl md:text-6xl font-serif italic text-deep-ink"></h2>
+                </div>
+                <p id="modal-desc" class="text-base md:text-xl font-serif italic opacity-60 leading-relaxed"></p>
+                <div class="grid grid-cols-2 gap-4 md:gap-8 border-t border-black/5 pt-6 md:pt-10">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest opacity-40">Elements</p>
+                        <p class="text-sm font-bold">22K Recycled Gold</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] uppercase tracking-widest opacity-40">Entry ID</p>
+                        <p id="modal-id" class="text-sm font-bold"></p>
+                    </div>
+                </div>
+                <button class="w-full py-5 bg-deep-ink text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-soft-gold transition-all">Initiate Acquisition</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <nav class="fixed top-0 w-full z-[400] px-4 md:px-12 py-6 md:py-10 flex justify-between items-center transition-all duration-700" id="mainNav">
+        <div class="flex items-center">
+            <button id="menuBtn" class="group flex items-center gap-3 md:gap-5 text-[9px] md:text-[11px] uppercase tracking-[0.3em] font-bold">
+                <span class="w-6 md:w-10 h-[1px] bg-black group-hover:w-14 transition-all"></span>
+                <span class="hidden sm:inline">Collection</span>
+            </button>
+        </div>
+        
+        <div class="absolute left-1/2 -translate-x-1/2 text-center group cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+            <h1 class="text-2xl md:text-5xl font-display italic tracking-tighter leading-none transition-all group-hover:tracking-normal">Sharda</h1>
+            <p class="text-[7px] tracking-[0.8em] uppercase text-soft-gold font-bold mt-1">Jewellers</p>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-10">
+            <a href="#bespoke" class="text-[9px] md:text-[11px] uppercase tracking-[0.2em] border-b border-black/10 pb-1 hover:border-soft-gold transition-colors hidden xs:block">Enquire</a>
+            <button class="hover:text-soft-gold transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        
+        <!-- HERO SECTION -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 overflow-hidden">
+            <div class="text-center z-10 relative">
+                <div class="reveal">
+                    <span class="text-[10px] md:text-xs uppercase tracking-[0.8em] text-soft-gold mb-6 md:mb-10 block">Archive Vol. 04</span>
+                    <h2 class="hero-text-main font-display italic leading-[0.85] text-deep-ink">Radiant <br/><span class="font-serif font-light text-soft-gold opacity-80">Essence.</span></h2>
+                </div>
+                <div class="mt-12 md:mt-20 reveal" style="transition-delay: 0.3s;">
+                    <p class="text-sm md:text-xl font-serif italic opacity-60 max-w-xl mx-auto leading-relaxed px-4">
+                        Hand-casting light into eternal form since 1974. A dialogue between precious metal and the soul.
+                    </p>
+                </div>
+            </div>
+            <!-- Floating Decorative Elements (Adaptive) -->
+            <div class="absolute top-[15%] right-[-10%] md:right-[5%] w-40 md:w-80 float-element opacity-40 md:opacity-100 reveal" style="transition-delay: 0.5s;">
+                <img src="https://images.unsplash.com/photo-1512163143273-bde0e3cc7407?q=80&w=2070" class="w-full rounded-full border border-soft-gold/20 p-2 md:p-4 bg-white/20 backdrop-blur-md">
+            </div>
+            <div class="absolute bottom-[10%] left-[-10%] md:left-[5%] w-32 md:w-72 float-element opacity-40 md:opacity-100 reveal" style="transition-delay: 0.7s; animation-delay: -2s;">
+                <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=2075" class="w-full rounded-full border border-soft-gold/20 p-2 md:p-4 bg-white/20 backdrop-blur-md">
+            </div>
+        </section>
+
+        <!-- GALLERY SECTION -->
+        <section id="gallery" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <div class="flex justify-between items-end mb-16 md:mb-32">
+                    <div class="reveal">
+                        <h3 class="text-5xl md:text-9xl font-serif italic text-deep-ink">The <br> Archive.</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-20">
+                    <div class="md:col-span-7 reveal">
+                        <div class="glass-card p-4 md:p-8 relative overflow-hidden group">
+                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce33e?q=80&w=2070" class="w-full aspect-[4/3] object-cover grayscale group-hover:grayscale-0 transition-all duration-1000">
+                            <div class="absolute top-8 right-8 md:top-12 md:right-12 text-right">
+                                <span class="text-[9px] font-bold uppercase tracking-widest block mb-1">Plate 001</span>
+                                <h4 class="text-2xl md:text-4xl font-serif italic">The Vedic Sovereign</h4>
+                            </div>
+                            <div class="mt-6 md:mt-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
+                                <p class="text-[10px] uppercase tracking-widest opacity-40">22K Gold • Heritage Polki</p>
+                                <button class="open-dossier text-[10px] font-bold uppercase tracking-widest border-b border-black pb-1" 
+                                        data-title="The Vedic Sovereign" 
+                                        data-desc="Crafted using recycled 22k gold, this archival piece features hand-selected Polki diamonds in a traditional Mughal setting." 
+                                        data-id="REF-2026-V1" 
+                                        data-img="https://images.unsplash.com/photo-1515562141207-7a88fb7ce33e?q=80&w=2070">
+                                    Explore Piece
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 flex flex-col justify-center reveal" style="transition-delay: 0.3s;">
+                        <div class="glass-card p-4 md:p-8 relative group mb-12">
+                            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1974" class="w-full aspect-[3/4] md:aspect-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-1000">
+                            <div class="absolute bottom-10 left-10">
+                                <span class="text-[9px] font-bold uppercase tracking-widest block mb-1">Plate 002</span>
+                                <h4 class="text-xl md:text-3xl font-serif italic">Celestial Orbit</h4>
+                            </div>
+                            <button class="open-dossier absolute bottom-10 right-10 text-[9px] uppercase font-bold border border-black/10 px-4 py-2 bg-white/60 backdrop-blur-sm"
+                                    data-title="Celestial Orbit" 
+                                    data-desc="A study of planetary motion in metal. Featuring a 4ct Ceylon sapphire set in fluid platinum waves." 
+                                    data-id="REF-2026-C2" 
+                                    data-img="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1974">
+                                Open
+                            </button>
+                        </div>
+                        <p class="text-base md:text-lg font-serif italic opacity-60 leading-relaxed max-w-xs md:ml-auto">
+                            "A meditation on the curvature of light and the weight of legacy."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MATERIALITY SECTION (ADAPTIVE) -->
+        <section id="materiality" class="py-20 md:py-40 bg-white/20">
+            <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12 md:gap-24">
+                <div class="lg:col-span-5 reveal">
+                    <span class="text-soft-gold text-[10px] tracking-[1em] uppercase block mb-6 md:mb-10">Purity Logic</span>
+                    <h3 class="text-5xl md:text-8xl font-serif italic leading-none mb-8 md:mb-12">Honest <br> Elements.</h3>
+                    <p class="text-base md:text-xl font-serif italic opacity-60 leading-relaxed">
+                        We define high-jewelry through structural honesty. Our 22k gold is refined within our own atelier walls to ensure no compromise in the ancestral 91.6 purity standard.
+                    </p>
+                </div>
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-10 reveal" style="transition-delay: 0.3s;">
+                    <div class="glass-card p-8 md:p-12 flex flex-col justify-between aspect-square md:aspect-auto md:h-[350px]">
+                        <div class="text-4xl font-display italic text-soft-gold">Gold.</div>
+                        <p class="text-xs md:text-sm font-serif opacity-70 leading-relaxed">Ethically reclaimed and tempered by hand-striking to achieve a distinct depth of luster.</p>
+                    </div>
+                    <div class="glass-card p-8 md:p-12 flex flex-col justify-between aspect-square md:aspect-auto md:h-[350px] sm:mt-12">
+                        <div class="text-4xl font-display italic text-soft-gold">Stones.</div>
+                        <p class="text-xs md:text-sm font-serif opacity-70 leading-relaxed">GIA-certified and source-mapped. We only acquire stones with a documented history of peace.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ATELIER SECTION -->
+        <section id="atelier" class="py-20 md:py-40 border-y border-soft-gold/10">
+            <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
+                <div class="relative reveal order-2 lg:order-1">
+                    <div class="w-full aspect-square rounded-full overflow-hidden border-[10px] md:border-[20px] border-silk-ivory shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1610992015732-2449b76344bc?q=80&w=1974" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -top-4 -right-4 md:-top-10 md:-right-10 bg-silk-ivory border border-soft-gold/30 w-24 h-24 md:w-40 md:h-40 rounded-full flex items-center justify-center text-center p-3 md:p-6 shadow-xl reveal" style="transition-delay: 0.4s;">
+                        <span class="text-[7px] md:text-[9px] font-bold uppercase tracking-widest">Original <br> Masterpiece <br> Since 1974</span>
+                    </div>
+                </div>
+                <div class="space-y-8 md:space-y-12 reveal order-1 lg:order-2">
+                    <span class="text-soft-gold text-[10px] tracking-[1em] uppercase block">The Alchemy</span>
+                    <h3 class="text-5xl md:text-9xl font-serif italic leading-none text-deep-ink">The Hand.</h3>
+                    <p class="text-base md:text-2xl font-serif italic opacity-70 leading-relaxed">
+                        Every piece in our archive is birthed through the 'Lost Wax' process. A hand-carved meditation in beeswax, later sacrificed to the fire to make way for molten gold.
+                    </p>
+                    <div class="flex gap-8 md:gap-16 border-t border-black/5 pt-8 md:pt-12">
+                        <div><span class="text-xl md:text-3xl font-serif text-soft-gold italic">0.01mm</span><p class="text-[8px] uppercase tracking-widest opacity-40 mt-2">Setting Tolerance</p></div>
+                        <div><span class="text-xl md:text-3xl font-serif text-soft-gold italic">50 Years</span><p class="text-[8px] uppercase tracking-widest opacity-40 mt-2">Atelier Heritage</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="bespoke" class="py-20 md:py-40 px-4">
+            <div class="max-w-6xl mx-auto glass-card p-8 md:p-24 relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 relative z-10">
+                    <div class="reveal">
+                        <h2 class="text-4xl md:text-8xl font-serif italic leading-none mb-8 md:mb-12 text-deep-ink">Direct <br> Dialogue.</h2>
+                        <p class="text-base md:text-2xl font-serif italic opacity-60 leading-relaxed mb-10 md:mb-16 max-w-md">
+                            Our designers are available for private commission appointments in Delhi, London, and Dubai.
+                        </p>
+                        <div class="space-y-4">
+                            <p class="text-[10px] uppercase tracking-widest opacity-40">Atelier Concierge</p>
+                            <p class="text-lg md:text-xl font-bold tracking-[0.2em]">+91 987 654 3210</p>
+                        </div>
+                    </div>
+                    <form id="contactForm" class="space-y-8 md:space-y-12 reveal" style="transition-delay: 0.2s;">
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase tracking-widest opacity-40">Identity</label>
+                            <input type="text" id="name" required placeholder="FULL NAME" class="w-full bg-transparent border-b border-black/10 py-4 outline-none focus:border-soft-gold transition-colors text-xs md:text-sm uppercase tracking-widest font-light">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase tracking-widest opacity-40">Purpose</label>
+                            <select id="type" class="w-full bg-transparent border-b border-black/10 py-4 outline-none focus:border-soft-gold text-[10px] md:text-xs uppercase tracking-[0.2em]">
+                                <option>Private Archive Acquisition</option>
+                                <option>Bespoke Commission</option>
+                                <option>Historical Restoration</option>
+                            </select>
+                        </div>
+                        <button type="submit" id="submitBtn" class="w-full py-6 bg-deep-ink text-white text-[10px] font-bold uppercase tracking-[0.6em] hover:bg-soft-gold transition-all">Log Dossier</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-20 px-8 border-t border-soft-gold/10">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-12 max-w-7xl mx-auto">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-display italic leading-none">Sharda</h1>
+                <p class="text-[8px] md:text-[10px] uppercase tracking-[0.5em] opacity-40 mt-2">Exquisite Goldsmithing • Est. 1974</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-8 md:gap-12 text-[10px] uppercase tracking-[0.3em] font-bold opacity-30">
+                <a href="#" class="hover:text-soft-gold transition-colors">Archive</a>
+                <a href="#" class="hover:text-soft-gold transition-colors">Ethics</a>
+                <a href="#" class="hover:text-soft-gold transition-colors">Instagram</a>
+            </div>
+            <p class="text-[9px] uppercase tracking-[0.4em] opacity-20">© 2026 Sharda Jewellers Private Ltd.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.getElementById('custom-cursor');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeMenu = document.getElementById('closeMenu');
+            const navMenu = document.getElementById('nav-menu');
+            const menuBg = document.getElementById('menu-overlay-bg');
+            const dossierModal = document.getElementById('dossier-modal');
+            const closeDossier = document.getElementById('closeDossier');
+            const mainNav = document.getElementById('mainNav');
+
+            // --- Custom Cursor Implementation ---
+            document.addEventListener('mousemove', (e) => {
+                if (cursor) {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                }
+            });
+
+            const interactables = 'a, button, input, textarea, select, .glass-card, .open-dossier';
+            document.querySelectorAll(interactables).forEach(el => {
+                el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+            });
+
+            // --- Navigation Drawer Logic ---
+            const toggleMenu = (state) => {
+                if (state) {
+                    navMenu.classList.add('active');
+                    menuBg.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    navMenu.classList.remove('active');
+                    menuBg.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            };
+
+            menuBtn.addEventListener('click', () => toggleMenu(true));
+            closeMenu.addEventListener('click', () => toggleMenu(false));
+            menuBg.addEventListener('click', () => toggleMenu(false));
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => toggleMenu(false));
+            });
+
+            // --- Dossier Modal Implementation ---
+            const modalImg = document.getElementById('modal-img');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDesc = document.getElementById('modal-desc');
+            const modalId = document.getElementById('modal-id');
+
+            document.querySelectorAll('.open-dossier').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modalImg.src = btn.dataset.img;
+                    modalTitle.innerText = btn.dataset.title;
+                    modalDesc.innerText = btn.dataset.desc;
+                    modalId.innerText = btn.dataset.id;
+                    dossierModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            closeDossier.addEventListener('click', () => {
+                dossierModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+
+            // --- Scroll Logic for Navbar Transparency ---
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 80) {
+                    mainNav.classList.add('bg-white/80', 'backdrop-blur-xl', 'py-4', 'shadow-sm');
+                    mainNav.classList.remove('py-10');
+                } else {
+                    mainNav.classList.remove('bg-white/80', 'backdrop-blur-xl', 'py-4', 'shadow-sm');
+                    mainNav.classList.add('py-10');
+                }
+            });
+
+            // --- Intersection Observer for Scroll Animations ---
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+            // --- Form Feedback UI ---
+            const contactForm = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if(contactForm) {
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "LOGGING DOSSIER...";
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        submitBtn.textContent = "COMMISSION RECEIVED";
+                        submitBtn.style.backgroundColor = "var(--soft-gold)";
+                        submitBtn.style.color = "white";
+                        contactForm.reset();
+                        
+                        setTimeout(() => {
+                            submitBtn.textContent = originalText;
+                            submitBtn.style.backgroundColor = "var(--deep-ink)";
+                            submitBtn.disabled = false;
+                        }, 3000);
+                    }, 1800);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
